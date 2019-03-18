@@ -24,7 +24,7 @@ from homeassistant.const import (
     CONF_WHITELIST_EXTERNAL_DIRS, CONF_AUTH_PROVIDERS, CONF_AUTH_MFA_MODULES,
     CONF_TYPE, CONF_ID)
 from homeassistant.core import callback, DOMAIN as CONF_CORE, HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ConfigFileNotFound
 from homeassistant.loader import get_component, get_platform
 from homeassistant.util.yaml import load_yaml, SECRET_YAML
 import homeassistant.helpers.config_validation as cv
@@ -335,7 +335,7 @@ def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
     try:
         conf_dict = load_yaml(config_path)
     except FileNotFoundError as err:
-        raise HomeAssistantError("Config file not found: {}".format(
+        raise ConfigFileNotFound("Config file not found: {}".format(
             getattr(err, 'filename', err)))
 
     if not isinstance(conf_dict, dict):

@@ -20,7 +20,7 @@ from homeassistant.components.group import (
     DOMAIN as DOMAIN_GROUP, SERVICE_SET)
 from homeassistant.components.zone.zone import async_active_zone
 from homeassistant.config import load_yaml_config_file, async_log_exception
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ConfigFileNotFound
 from homeassistant.helpers import config_per_platform, discovery
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import async_track_time_interval
@@ -29,7 +29,7 @@ from homeassistant.helpers.typing import GPSType, ConfigType, HomeAssistantType
 from homeassistant import util
 from homeassistant.util.async_ import run_coroutine_threadsafe
 import homeassistant.util.dt as dt_util
-from homeassistant.util.yaml import dump
+from homeassistant.util.yaml import dump, save_yaml
 
 from homeassistant.helpers.event import async_track_utc_time_change
 from homeassistant.const import (
@@ -144,7 +144,6 @@ def see(hass: HomeAssistantType, mac: str = None, dev_id: str = None,
 async def async_setup(hass: HomeAssistantType, config: ConfigType):
     """Set up the device tracker."""
     yaml_path = hass.config.path(YAML_DEVICES)
-
     conf = config.get(DOMAIN, [])
     conf = conf[0] if conf else {}
     consider_home = conf.get(CONF_CONSIDER_HOME, DEFAULT_CONSIDER_HOME)
@@ -663,6 +662,11 @@ async def async_load_config(path: str, hass: HomeAssistantType,
         try:
             devices = await hass.async_add_job(
                 load_yaml_config_file, path)
+        except ConfigFileNotFound as c_err:
+            _LOGGER.error("No known_devices.yaml at %s", path)
+            save_yaml(path, dict())
+            _LOGGER.info("Creating %s", path)
+            return []
         except HomeAssistantError as err:
             _LOGGER.error("Unable to load %s: %s", path, str(err))
             return []

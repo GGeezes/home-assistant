@@ -36,6 +36,8 @@ class PlatformNotReady(HomeAssistantError):
 class ConfigEntryNotReady(HomeAssistantError):
     """Error to indicate that config entry is not ready."""
 
+class ConfigFileNotFound(HomeAssistantError):
+    """Config file not found on disk"""
 
 class InvalidStateError(HomeAssistantError):
     """When an invalid state is encountered."""
